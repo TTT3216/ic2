@@ -131,7 +131,7 @@ const ImageCompressorApp = () => {
     const fetchDailyStats = async () => {
       console.log('[fetchDailyStats] Fetching daily stats...');
       try {
-        const response = await fetch('http://localhost:5001/daily-stats');
+        const response = await fetch('https://ic2-backend-44qq.onrender.com/');
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: "統計データの取得に失敗しました。" }));
           console.error('[fetchDailyStats] Failed to fetch, status:', response.status, 'Error data:', errorData);

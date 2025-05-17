@@ -1,0 +1,41 @@
+{
+    "compilerOptions": {
+      "target": "es5", // ES5にトランスパイル
+      "lib": [
+        "dom",
+        "dom.iterable",
+        "esnext"
+      ], // 利用可能なライブラリの型定義
+      "allowJs": true, // JavaScriptファイルのコンパイルを許可
+      "skipLibCheck": true, // 型定義ファイルのチェックをスキップ
+      "esModuleInterop": true, // ESモジュールとCommonJSモジュール間の相互運用性を向上
+      "allowSyntheticDefaultImports": true, // default exportがないモジュールからのdefault importを許可
+      "strict": true, // すべての厳格な型チェックオプションを有効化
+      "forceConsistentCasingInFileNames": true, // ファイル名の大文字・小文字を区別
+      "noFallthroughCasesInSwitch": true, // switch文でのフォールスルーをエラーに
+      "module": "esnext", // モジュールシステム
+      "moduleResolution": "node", // モジュール解決方法
+      "resolveJsonModule": true, // JSONモジュールのインポートを許可
+      "isolatedModules": true, // 各ファイルを個別のモジュールとしてトランスパイル
+      "noEmit": true, // 出力ファイル（JavaScriptなど）を生成しない (Babelなどが担当する場合)
+      "jsx": "react-jsx", // JSXのトランスパイル方法
+      "baseUrl": "./src", // src フォルダを基準にする      
+      "paths": {
+        "@/*": ["./*"] // `@/` を `baseUrl` (./src) からの相対パスにマッピング (例: `@/components` は `src/components` を指す)
+      }
+    },
+    "include": [
+      "src/**/*.ts", // コンパイル対象に含めるファイル (srcディレクトリ以下の .ts ファイル)
+      "src/**/*.tsx"  // コンパイル対象に含めるファイル (srcディレクトリ以下の .tsx ファイル)
+      // もし全ての .ts/.tsx ソースファイルが 'src' ディレクトリ内にあれば、
+      // 上記の2行で十分です。
+      // 下記の行は、プロジェクトルート直下（'src' の外）に 'components' や 'lib' フォルダがあり、
+      // それらが .ts/.tsx ファイルを含む場合にのみ必要です。
+      // "components/**/*.ts",
+      // "components/**/*.tsx",
+      // "lib/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules" // コンパイル対象から除外するディレクトリ
+    ]
+  }

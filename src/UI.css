@@ -1,0 +1,268 @@
+/* ImageCompressor.css */
+/* アプリケーション全体のスタイル */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-gradient: linear-gradient(to right, #4f46e5, #8b5cf6);
+  --secondary-gradient: linear-gradient(to right, #10b981, #3b82f6);
+  --primary-color: #4f46e5;
+  --secondary-color: #8b5cf6;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --light-bg: #f9fafb;
+  --card-bg: #ffffff;
+  --text-dark: #1f2937;
+  --text-muted: #6b7280;
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+  color: var(--text-dark);
+  background-color: var(--light-bg); /* テスト用の黄色指定は削除 */
+  line-height: 1.6;
+}
+
+/* ヘッダーアニメーション */
+.header-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* アップロードエリアのスタイル */
+.upload-area {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  border-color: var(--primary-color);
+}
+
+.upload-area .upload-icon {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.upload-area:hover .upload-icon {
+  opacity: 0.7;
+}
+
+/* 画像カードのスタイル */
+.image-card {
+  transition: all 0.3s ease;
+}
+
+.image-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 圧縮スタートボタンのアニメーション */
+.compress-button {
+  overflow: hidden;
+  position: relative;
+}
+
+.compress-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.compress-button:hover::after {
+  transform: translateX(0);
+}
+
+/* 広告エリアのスタイル */
+.ad-container {
+  transition: all 0.3s ease;
+}
+
+.ad-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* ダウンロードボタンのスタイル */
+.download-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.download-button:hover {
+  transform: scale(1.2);
+}
+
+/* スケルトンローディングアニメーション */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* カード内の画像表示エリア */
+.image-preview {
+  position: relative;
+  overflow: hidden;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
+}
+
+.image-preview img {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.image-preview:hover img {
+  transform: scale(1.05);
+}
+
+/* 圧縮率バッジ */
+.compression-badge {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background-color: rgba(79, 70, 229, 0.9);
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(0.5rem);
+  transition: all 0.3s ease;
+}
+
+.image-card:hover .compression-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* レスポンシブデザインの微調整 */
+@media (max-width: 768px) {
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+
+  .content-area {
+    width: 100%;
+  }
+}
+
+/* ダークモード対応（オプション） */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --light-bg: #1f2937;
+    --card-bg: #111827;
+    --text-dark: #f9fafb;
+    --text-muted: #9ca3af;
+  }
+}
+
+
+/* Diagnostic styles for header layout */
+.max-w-7xl.mx-auto.flex.justify-between.items-center {
+  border: 2px solid lime !important;     /* To visualize the parent flex container */
+  display: flex !important;             /* Force display: flex */
+  justify-content: space-between !important; /* Force justify-content */}
+
+/* Target the button specifically based on its common classes */
+.max-w-7xl.mx-auto.flex.justify-between.items-center > button.text-white.border-white {
+  margin-left: auto !important; /* Attempt to force it to the right */
+  border: 2px solid lime !important; /* To visualize the button and see if this rule applies */
+  border: 2px solid lime !important; /* To visualize the button */
+  height: 28px !important; /* 1.75rem (h-7相当) をピクセルで指定 */
+  min-height: 28px !important; /* min-heightも念のため指定 */
+  padding-top: 4px !important; /* 0.25rem (py-1の上半分相当) をピクセルで指定 */
+  padding-bottom: 4px !important; /* 0.25rem (py-1の下半分相当) をピクセルで指定 */
+  display: inline-flex !important; /* Buttonコンポーネントのデフォルトに近い形に戻す */
+}
+
+/* 以下のスタイルは、アフィリエイト広告を中央に表示するために一時的に追加したものです。 */
+/* 他の要素が表示されなくなった場合は、これらのスタイルをコメントアウトまたは削除してください。 */
+
+#main-content-layout-wrapper {
+  display: grid !important;
+  grid-template-columns: 1fr; /* すべての要素を1つのカラムに配置 */
+  /* grid-template-columns: minmax(250px, auto) 1fr minmax(250px, auto); */ /* 幅の最小値を指定する場合 */
+  gap: 50px; /* 各セクション間の溝 */
+  width: 100%;
+  align-items: start; /* 各セクションの上端を揃える */
+  padding-right: 0 !important; /* 以前のpadding-rightをリセット */
+  justify-items: center; /* グリッドアイテムをデフォルトで中央揃えにする */
+}
+
+#affiliate-ads-section {
+  grid-column: 1; /* 最初の列に配置 */
+  margin-right: 0 !important;
+  /* width: auto; */ /* グリッドアイテムなので幅は自動調整されることが多い */
+  max-width: 350px; /* アフィリエイト広告の最大幅 */
+  /* padding-right: 5px !important; */ /* 右寄せでなくなったため、この右パディングは不要または調整 */
+  /* justify-self: start; */ /* 親でjustify-items: centerを指定したので不要な場合が多い */
+}
+
+#google-ads-section {
+  grid-column: 1; /* 最初の列に配置 */
+  /* width: auto; */
+  max-width: 350px; /* Google広告の最大幅 */
+  /* justify-self: start; */ /* 親でjustify-items: centerを指定したので不要な場合が多い */
+  /* padding-left: 5px !important; */ /* 左端の余白は不要に */
+  /* padding-right: 5px !important; */ /* 右寄せでなくなったため、この右パディングは不要または調整 */
+  /* padding-right: 5px !important; */ /* 右端配置ではなくなったため、この行は不要または調整 */
+}
+
+#image-compressor-section {
+  grid-column: 1; /* 最初の列に配置 */
+  justify-self: center !important; /* 明示的に中央揃えを指定 (親の指定が効かない場合の保険) */
+  width: 100%; /* セルの幅いっぱいに広がる */
+  max-width: 1000px; /* 画像圧縮セクションの最大幅 */
+}
+
+
+
+#image-compressor-section,
+#google-ads-section {
+  display: block !important; /* 非表示を解除 (必要に応じて flex など元の表示形式に) */
+}
+
+/* より詳細で、ベンダープレフィックスも考慮した指定 */
+input[type="file"]#file-upload::-webkit-input-placeholder { /* Chrome, Safari, Opera, Edge */
+  color: #000000 !important; /* 黒色 */
+  opacity: 1 !important;
+}
+input[type="file"]#file-upload::-moz-placeholder { /* Firefox 19+ */
+  color: #000000 !important; /* 黒色 */
+  opacity: 1 !important;
+}
+input[type="file"]#file-upload:-ms-input-placeholder { /* IE 10+ */
+  color: #000000 !important; /* 黒色 */
+  opacity: 1 !important;
+}
+input[type="file"]#file-upload::placeholder { /* Standard */
+  color: #000000 !important; /* 黒色 */
+  opacity: 1 !important;
+}

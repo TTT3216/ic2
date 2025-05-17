@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Bar } from 'react-chartjs-2'; // ★ グラフ描画用にインポート
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,14 +21,11 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js'; // ★ Chart.jsの要素をインポート
+} from 'chart.js';
+import { Download, Image as ImageIcon, Loader2, Mail, X, Trash2, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react';
+import './UI.css';
+import xIcon from './x_icon.png';
 
-// import { cn } from '@/lib/utils'; // 未使用
-import { Download, Image as ImageIcon, Loader2, Mail, X, Trash2, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react'; // TrendingUpを追加
-import './UI.css'; // UI.cssファイルをインポート
-import xIcon from './x_icon.png'; // Xアイコン画像をインポート
-
-// ★ Chart.jsの要素を登録
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -38,15 +35,12 @@ ChartJS.register(
   Legend
 );
 
-// アフィリエイト広告コンポーネント
 const AffiliateAdArea = ({ label, index }: { label: string; index: number }) => (
   <motion.div
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ duration: 0.5, delay: index * 0.2 }}
-    className="w-full h-48 text-gray-800 flex items-center justify-center
-      rounded-lg shadow-lg mb-6 border border-yellow-300 bg-yellow-50
-      hover:shadow-xl transition-all duration-300 cursor-pointer"
+    className="w-full h-48 text-gray-800 flex items-center justify-center rounded-lg shadow-lg mb-6 border border-yellow-300 bg-yellow-50 hover:shadow-xl transition-all duration-300 cursor-pointer"
   >
     <div className="text-center p-4">
       <div className="text-yellow-600 font-bold mb-2">{label}</div>
@@ -56,7 +50,6 @@ const AffiliateAdArea = ({ label, index }: { label: string; index: number }) => 
 
 const GoogleAdsenseAdArea = AffiliateAdArea;
 
-// フッターコンポーネント
 const Footer = () => (
   <motion.footer
     initial={{ opacity: 0, y: 20 }}

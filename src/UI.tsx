@@ -116,7 +116,7 @@ const ImageCompressorApp = () => {
     // アクセス記録APIを呼び出し
     const recordAccess = async () => {
       try {
-        const response = await fetch('http://localhost:5001/record-access', { method: 'POST' });
+        const response = await fetch('https://ic2-backend-44qq.onrender.com/', { method: 'POST' });
         if (!response.ok) {
           console.error('Failed to record access:', response.statusText);
         } else {

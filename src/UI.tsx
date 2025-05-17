@@ -109,7 +109,7 @@ const ImageCompressorApp = () => {
     // アクセス記録APIを呼び出し
     const recordAccess = async () => {
       try {
-        const response = await fetch('https://ic2-backend-44qq.onrender.com/', { method: 'POST' });
+        const response = await fetch('https://ic2-backend-44qq.onrender.com/record-access', { method: 'POST' });
         if (!response.ok) {
           console.error('Failed to record access:', response.statusText);
         } else {
@@ -124,7 +124,7 @@ const ImageCompressorApp = () => {
     const fetchDailyStats = async () => {
       console.log('[fetchDailyStats] Fetching daily stats...');
       try {
-        const response = await fetch('https://ic2-backend-44qq.onrender.com/');
+        const response = await fetch('https://ic2-backend-44qq.onrender.com/daily-stats');
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: "統計データの取得に失敗しました。" }));
           console.error('[fetchDailyStats] Failed to fetch, status:', response.status, 'Error data:', errorData);

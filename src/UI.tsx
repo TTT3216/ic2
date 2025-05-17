@@ -429,7 +429,7 @@ const ImageCompressorApp = () => {
 
     try {
       console.log("[handleCompress] Sending request to /compress-images");
-      const response = await fetch('http://localhost:5001/compress-images', {
+      const response = await fetch('https://ic2-backend-44qq.onrender.com/compress-images', {
         method: 'POST',
         body: formData,
       });

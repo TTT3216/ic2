@@ -13,7 +13,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
-import { Download, Image as ImageIcon, Loader2, Mail, X, Trash2, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react';
+import { Download, Image as ImageIcon, Loader2, Mail, X, Trash2, BookOpen, CheckCircle2 } from 'lucide-react';
 import './UI.css';
 import xIcon from './x_icon.png';
 
@@ -57,16 +57,10 @@ interface ImageDetail {
   id: string;
   name: string;
   originalSrc: string;
-  file: File; // To store the actual File object
+  file: File;
   compressedSrc: string | null;
   originalSize?: number;
   compressedSize?: number;
-}
-
-// ★ 統計データ用のインターフェース
-interface DailyStat {
-  date: string; // バックエンドのレスポンスキー 'date' に合わせる
-  count: number; // バックエンドのレスポンスキー 'count' に合わせる
 }
 
 const ImageCompressorApp = () => {
@@ -84,9 +78,7 @@ const ImageCompressorApp = () => {
   const [emailSentMessage, setEmailSentMessage] = useState<string | null>(null);
   const [isUsageDialogOpen, setIsUsageDialogOpen] = useState(false);
 
-  // ★ ページ読み込み時にアクセスを記録し、統計データを取得するuseEffect
   useEffect(() => {
-    // アクセス記録APIを呼び出し
     const recordAccess = async () => {
       try {
         const response = await fetch('https://ic2-backend-44qq.onrender.com/record-access', { method: 'POST' });
@@ -100,53 +92,8 @@ const ImageCompressorApp = () => {
       }
     };
 
-    // 日毎の統計データを取得
-    const fetchDailyStats = async () => {
-      console.log('[fetchDailyStats] Fetching daily stats...');
-      try {
-        const response = await fetch('https://ic2-backend-44qq.onrender.com/daily-stats');
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: "統計データの取得に失敗しました。" }));
-          console.error('[fetchDailyStats] Failed to fetch, status:', response.status, 'Error data:', errorData);
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        }
-        const data: DailyStat[] = await response.json();
-        console.log('[fetchDailyStats] Received data:', data);
-        // バックエンドから正しいキー名 (date, count) でデータが来ているか確認
-        if (data && data.length > 0 && 'date' in data[0] && 'count' in data[0]) {
-            setDailyStats(data);
-            setStatsError(null);
-        } else if (data && data.length > 0) {
-            // キー名が違う場合のフォールバックやログ
-            console.warn('[fetchDailyStats] Data received with unexpected keys. Expected "date" and "count". Received:', data[0]);
-            // もし visit_date, visit_count で来ていたら変換する (一時的な対応)
-            const mappedData = data.map((item: any) => ({
-                date: item.visit_date || item.date,
-                count: item.visit_count || item.count
-            })).filter(item => item.date && typeof item.count === 'number');
-            
-            if(mappedData.length > 0 && 'date' in mappedData[0] && 'count' in mappedData[0]) {
-                console.log('[fetchDailyStats] Mapped data to use:', mappedData);
-                setDailyStats(mappedData);
-                setStatsError(null);
-            } else {
-                setStatsError('統計データの形式が正しくありません。');
-                setDailyStats([]);
-            }
-        } else {
-            setDailyStats([]); // データがない場合は空配列
-            setStatsError(null); // エラーではない
-        }
-      } catch (error: any) {
-        console.error('[fetchDailyStats] Error fetching daily stats:', error);
-        setStatsError(error.message || '統計データの読み込み中にエラーが発生しました。');
-        setDailyStats([]); // エラー時はデータを空にする
-      }
-    };
-
     recordAccess();
-    fetchDailyStats();
-  }, []); // 空の依存配列で初回マウント時のみ実行
+  }, []);
 
   const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -159,7 +106,7 @@ const ImageCompressorApp = () => {
               id: `${file.name}-${Date.now()}-${index}`,
               name: file.name,
               originalSrc: event.target?.result as string,
-              file: file, 
+              file: file,
               compressedSrc: null,
               originalSize: file.size,
               compressedSize: undefined,
@@ -179,7 +126,7 @@ const ImageCompressorApp = () => {
           setEmailSendStatusMessage(null);
           setEmailSentMessage(null);
           setCurrentCompressionTaskId(null);
-          setCompressedZipFilename('圧縮保存した写真フォルダ.zip'); 
+          setCompressedZipFilename('圧縮保存した写真フォルダ.zip');
           setCurrentEmailTaskId(null);
         })
         .catch(error => {
@@ -204,14 +151,14 @@ const ImageCompressorApp = () => {
     setEmailSentMessage(null);
     setCurrentCompressionTaskId(null);
     setCurrentEmailTaskId(null);
-    setCompressedZipFilename('圧縮保存した写真フォルダ.zip'); 
-    setIsCompressing(false); 
-    setIsSendingEmail(false); 
+    setCompressedZipFilename('圧縮保存した写真フォルダ.zip');
+    setIsCompressing(false);
+    setIsSendingEmail(false);
     if (inputRef.current) {
       inputRef.current.value = '';
     }
   }, []);
-  
+
   const downloadCompressedZip = useCallback(() => {
     console.log("downloadCompressedZip function CALLED!");
     if (!compressedZipBlob) {
@@ -225,7 +172,7 @@ const ImageCompressorApp = () => {
     const url = window.URL.createObjectURL(compressedZipBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = compressedZipFilename; 
+    a.download = compressedZipFilename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -233,9 +180,11 @@ const ImageCompressorApp = () => {
     console.log("ZIP file download initiated by downloadCompressedZip function.");
   }, [compressedZipBlob, compressedZipFilename]);
 
+  type ClearPollingFunction = (() => void) | null;
+
   const pollTaskStatus = useCallback((
     taskId: string,
-    onComplete: (data: any, filename?: string) => void, 
+    onComplete: (data: Blob | { message: string }, filename?: string) => void,
     onError: (errorMsg: string) => void,
     setStatusMessage: (msg: string | null) => void,
     isCompressionTask: boolean = false
@@ -255,9 +204,9 @@ const ImageCompressorApp = () => {
     };
 
     if (isCompressionTask && currentEmailTaskId) {
-        console.log(`[pollTaskStatus (${taskType})] Previous email task polling might be active. Consider more robust polling management.`);
+      console.log(`[pollTaskStatus (${taskType})] Previous email task polling might be active. Consider more robust polling management.`);
     } else if (!isCompressionTask && currentCompressionTaskId) {
-        console.log(`[pollTaskStatus (${taskType})] Previous compression task polling might be active. Consider more robust polling management.`);
+      console.log(`[pollTaskStatus (${taskType})] Previous compression task polling might be active. Consider more robust polling management.`);
     }
 
     const checkStatus = async () => {
@@ -285,15 +234,15 @@ const ImageCompressorApp = () => {
       try {
         console.log(`[pollTaskStatus (${taskType}) attempt ${attempts}] Fetching status for task: ${taskId}`);
         const response = await fetch(`http://localhost:5001/task-status/${taskId}`);
-        
+
         if (response.status === 200) {
           const contentType = response.headers.get("content-type");
           console.log(`[pollTaskStatus (${taskType})] Task ${taskId} - Response Content-Type:`, contentType);
-          if (contentType?.includes("application/zip")) { 
+          if (contentType?.includes("application/zip")) {
             setStatusMessage(null);
             console.log(`[pollTaskStatus (${taskType})] Task ${taskId} - Preparing to call onComplete with blob.`);
             const blob = await response.blob();
-            let filenameFromServer = '圧縮保存した写真フォルダ.zip'; 
+            let filenameFromServer = '圧縮保存した写真フォルダ.zip';
             const disposition = response.headers.get('content-disposition');
             console.log(`[pollTaskStatus (${taskType})] Raw Content-Disposition header for task ${taskId}:`, disposition);
 
@@ -307,14 +256,14 @@ const ImageCompressorApp = () => {
                   console.warn(`[pollTaskStatus (${taskType})] decodeURIComponent failed for filename* '${filenameStarMatch[1]}' for task ${taskId}:`, e);
                   const filenameMatch = disposition.match(/filename="([^"]+)"/i) || disposition.match(/filename=([^;]+)/i);
                   if (filenameMatch && filenameMatch[1]) {
-                    filenameFromServer = filenameMatch[1].replace(/^"|"$/g, ''); 
+                    filenameFromServer = filenameMatch[1].replace(/^"|"$/g, '');
                     console.log(`[pollTaskStatus (${taskType})] Extracted filename from plain filename (fallback after filename* error) for task ${taskId}:`, filenameFromServer);
                   }
                 }
               } else {
                 const filenameMatch = disposition.match(/filename="([^"]+)"/i) || disposition.match(/filename=([^;]+)/i);
                 if (filenameMatch && filenameMatch[1]) {
-                  filenameFromServer = filenameMatch[1].replace(/^"|"$/g, ''); 
+                  filenameFromServer = filenameMatch[1].replace(/^"|"$/g, '');
                   console.log(`[pollTaskStatus (${taskType})] Extracted filename from plain filename for task ${taskId}:`, filenameFromServer);
                 }
               }
@@ -323,7 +272,7 @@ const ImageCompressorApp = () => {
             }
 
             console.log(`[pollTaskStatus (${taskType})] Final filename to be passed to onComplete for task ${taskId}: ${filenameFromServer}`);
-            onComplete(blob, filenameFromServer); 
+            onComplete(blob, filenameFromServer);
             console.log(`[pollTaskStatus (${taskType})] Task ${taskId} completed (ZIP received).`);
             clearPolling();
             if (isCompressionTask) setIsCompressing(false);
@@ -335,7 +284,7 @@ const ImageCompressorApp = () => {
               currentTimeoutId = setTimeout(checkStatus, interval);
             } else if (data.status === "completed") {
               setStatusMessage(null);
-              onComplete(data.result || data); 
+              onComplete(data.result || data);
               console.log(`[pollTaskStatus (${taskType})] Task ${taskId} completed (JSON result). Result:`, data.result || data);
               clearPolling();
               if (!isCompressionTask) setIsSendingEmail(false);
@@ -346,11 +295,11 @@ const ImageCompressorApp = () => {
               clearPolling();
               if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
             } else {
-                setStatusMessage("予期しないレスポンス形式です (JSON status unknown)。");
-                onError("予期しないレスポンス形式 (JSON status unknown)");
-                console.error(`[pollTaskStatus (${taskType})] Task ${taskId} unexpected JSON status:`, data);
-                clearPolling();
-                if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
+              setStatusMessage("予期しないレスポンス形式です (JSON status unknown)。");
+              onError("予期しないレスポンス形式 (JSON status unknown)");
+              console.error(`[pollTaskStatus (${taskType})] Task ${taskId} unexpected JSON status:`, data);
+              clearPolling();
+              if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
             }
           } else {
             setStatusMessage("サーバーから予期しない形式の応答がありました。");
@@ -359,7 +308,7 @@ const ImageCompressorApp = () => {
             clearPolling();
             if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
           }
-        } else { 
+        } else {
           const errorText = await response.text();
           setStatusMessage(`エラーが発生しました: ${response.status} ${errorText}`);
           onError(`サーバーエラー: ${response.status} ${errorText}`);
@@ -377,7 +326,7 @@ const ImageCompressorApp = () => {
     };
     console.log(`[pollTaskStatus (${taskType})] Starting polling for task: ${taskId}`);
     checkStatus();
-    return clearPolling; 
+    return clearPolling;
   }, [currentCompressionTaskId, currentEmailTaskId]);
 
   const handleCompress = useCallback(async () => {
@@ -392,11 +341,11 @@ const ImageCompressorApp = () => {
     setCompressionStatusMessage("圧縮処理の準備をしています...");
     setEmailSendStatusMessage(null);
     setEmailSentMessage(null);
-    setCompressedZipFilename('圧縮保存した写真フォルダ.zip'); 
-    setCurrentEmailTaskId(null); 
+    setCompressedZipFilename('圧縮保存した写真フォルダ.zip');
+    setCurrentEmailTaskId(null);
 
     const formData = new FormData();
-    selectedImages.forEach(imageDetail => { 
+    selectedImages.forEach(imageDetail => {
       formData.append('images', imageDetail.file, imageDetail.name);
     });
 

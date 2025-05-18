@@ -12,28 +12,10 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+
 import { Download, Image as ImageIcon, Loader2, Mail, X, Trash2, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react';
 import './UI.css';
 import xIcon from './x_icon.png';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 const AffiliateAdArea = ({ label, index }: { label: string; index: number }) => (
   <motion.div
@@ -101,8 +83,6 @@ const ImageCompressorApp = () => {
   const [currentEmailTaskId, setCurrentEmailTaskId] = useState<string | null>(null);
   const [emailSentMessage, setEmailSentMessage] = useState<string | null>(null);
   const [isUsageDialogOpen, setIsUsageDialogOpen] = useState(false);
-  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]); // ★ 日毎の統計データ用state
-  const [statsError, setStatsError] = useState<string | null>(null); // ★ 統計データ取得エラー用state
 
   // ★ ページ読み込み時にアクセスを記録し、統計データを取得するuseEffect
   useEffect(() => {

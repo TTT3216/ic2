@@ -12,13 +12,9 @@ from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email import encoders # encode_base64 のために残す
 import threading
-import datetime
-from datetime import date
 import time
 import traceback # エラー詳細表示用
 from dotenv import load_dotenv # .envファイル読み込み用
-import mysql.connector
-from mysql.connector import Error
 from email.utils import encode_rfc2231 # ★ encode_rfc2231 は email.utils にあります
 
 load_dotenv() # .env ファイルから環境変数を読み込む
@@ -29,11 +25,6 @@ CORS(app, expose_headers=['Content-Disposition'])
 GMAIL_USER = os.environ.get('GMAIL_USER')
 GMAIL_APP_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD')
 
-DB_HOST = os.environ.get('DB_HOST', 'localhost')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_NAME = os.environ.get('DB_NAME', 'image_compressor_stats')
-
 
 executor = ProcessPoolExecutor(max_workers=os.cpu_count() or 2)
 tasks = {}
@@ -41,27 +32,6 @@ tasks_lock = threading.Lock()
 
 TASK_TIMEOUT_SECONDS = 300
 MAX_IMAGE_DIMENSION = 1600
-
-def get_db_connection():
-    """MySQLデータベースへの接続を取得します。"""
-    if not DB_USER or not DB_PASSWORD:
-        print("エラー: DB_USER または DB_PASSWORD が環境変数に設定されていません。")
-        return None
-    try:
-        conn = mysql.connector.connect(
-            host=DB_HOST,
-            user=DB_USER,
-            password=DB_PASSWORD,
-            database=DB_NAME
-        )
-        if conn.is_connected():
-            print(f"MySQLデータベース ({DB_NAME}) に接続しました。")
-            return conn
-    except Error as e:
-        print(f"MySQLデータベースへの接続エラー: {e}")
-        traceback.print_exc()
-        return None
-    return None
 
 
 def compress_image_data(image_bytes_io, original_filename_for_format_hint, output_quality=35, max_size_kb=None):
@@ -144,7 +114,7 @@ def _compress_images_task(task_id, image_files_content_list):
 def _update_task_status_from_future(task_id, future):
     print(f"[_update_task_status_from_future] Updating status for task {task_id}")
     try:
-        result_data = future.result() 
+        result_data = future.result()
         with tasks_lock:
             if task_id in tasks:
                 tasks[task_id].update(result_data)
@@ -267,78 +237,6 @@ def send_zip_email_route():
 
     return jsonify({"message": "メール送信処理を受け付けました。", "task_id": task_id}), 202
 
-@app.route('/record-access', methods=['POST'])
-def record_access_route():
-    """今日のアクセスを記録します。"""
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "データベース接続に失敗しました。"}), 500
-
-    cursor = None
-    try:
-        cursor = conn.cursor()
-        today_str = date.today().isoformat()
-
-        cursor.execute("SELECT visit_count FROM daily_visits WHERE visit_date = %s", (today_str,))
-        result = cursor.fetchone()
-
-        if result:
-            new_count = result[0] + 1
-            cursor.execute("UPDATE daily_visits SET visit_count = %s WHERE visit_date = %s", (new_count, today_str))
-            print(f"今日の訪問者数を更新しました: {new_count} ({today_str})")
-        else:
-            cursor.execute("INSERT INTO daily_visits (visit_date, visit_count) VALUES (%s, %s)", (today_str, 1))
-            print(f"今日の最初の訪問者を記録しました。 ({today_str})")
-        
-        conn.commit()
-        return jsonify({"message": "アクセスが記録されました。"}), 200
-    except Error as e:
-        if conn:
-            conn.rollback()
-        print(f"[/record-access] エラー: {e}")
-        traceback.print_exc()
-        return jsonify({"error": "アクセス記録に失敗しました。"}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if conn and conn.is_connected():
-            conn.close()
-            # print("MySQL接続を閉じました。(/record-access)") # 頻繁なのでコメントアウト
-
-@app.route('/daily-stats', methods=['GET'])
-def get_daily_stats_route():
-    """日毎の訪問者数を取得します。"""
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "データベース接続に失敗しました。"}), 500
-
-    cursor = None
-    try:
-        cursor = conn.cursor(dictionary=True) 
-        cursor.execute("SELECT visit_date, visit_count FROM daily_visits ORDER BY visit_date ASC")
-        stats = cursor.fetchall()
-        
-        formatted_stats = []
-        for row in stats:
-            visit_date_iso = row['visit_date'].isoformat() if isinstance(row['visit_date'], date) else str(row['visit_date'])
-            formatted_stats.append({
-                "date": visit_date_iso, # フロントエンドの期待するキー名 "date"
-                "count": row['visit_count'] # フロントエンドの期待するキー名 "count"
-            })
-        print(f"日毎の統計データを取得しました: {len(formatted_stats)}件")
-        return jsonify(formatted_stats), 200
-    except Error as e:
-        print(f"[/daily-stats] エラー: {e}")
-        traceback.print_exc()
-        return jsonify({"error": "日毎の統計データ取得に失敗しました。"}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if conn and conn.is_connected():
-            conn.close()
-            # print("MySQL接続を閉じました。(/daily-stats)") # 頻繁なのでコメントアウト
-
-
 @app.route('/task-status/<task_id>', methods=['GET'])
 def task_status_route(task_id):
     with tasks_lock:
@@ -352,7 +250,7 @@ def task_status_route(task_id):
             if task_id in tasks and tasks[task_id]["status"] in ["pending", "processing"]:
                 tasks[task_id]["status"] = "error"
                 tasks[task_id]["error_message"] = "タスクがタイムアウトしました。"
-        task = tasks.get(task_id) 
+        task = tasks.get(task_id)
 
     if task["status"] == "completed":
         if "result" in task and isinstance(task["result"], dict) and "files" in task["result"]:
@@ -361,51 +259,25 @@ def task_status_route(task_id):
                 for item in task["result"]["files"]:
                     zip_file_obj.writestr(item['filename'], item['data'])
             zip_buffer.seek(0)
-            now = datetime.datetime.now()
-            date_str = now.strftime("%Y-%m-%d")
+            # datetime をインポートしていないため、time を使用
+            now = time
+            date_str = time.strftime("%Y-%m-%d", time.localtime())
             time_str = now.strftime("%H%M%S")
             download_filename = f"圧縮画像_{date_str}_{time_str}.zip"
             print(f"DEBUG: Sending file with download_name: {download_filename}")
             return send_file(zip_buffer, as_attachment=True, download_name=download_filename, mimetype='application/zip')
-        elif "result" in task and isinstance(task["result"], dict) and "message" in task["result"]: 
+        elif "result" in task and isinstance(task["result"], dict) and "message" in task["result"]:
              return jsonify({"status": task["status"], "message": task["result"]["message"]})
-        else: 
+        else:
             print(f"Task {task_id} completed but result format is unexpected: {task.get('result')}")
             return jsonify({"status": task["status"], "result": task.get("result")})
     elif task["status"] == "error":
         return jsonify({"status": task["status"], "error": task.get("error_message", "不明なエラー")}), 500
-    else: 
+    else:
         return jsonify({"status": task["status"]}), 200
 
 if __name__ == '__main__':
     if not GMAIL_USER or not GMAIL_APP_PASSWORD:
         print("警告: GMAIL_USER または GMAIL_APP_PASSWORD が環境変数に設定されていません。メール送信機能は動作しません。")
-    if not DB_USER or not DB_PASSWORD:
-        print("警告: DB_USER または DB_PASSWORD が環境変数に設定されていません。データベース機能は動作しません。")
-        print(f"現在の設定: DB_USER='{DB_USER}', DB_PASSWORD='{'設定済み' if DB_PASSWORD else '未設定'}'")
-
-    conn_check = get_db_connection()
-    if conn_check:
-        try:
-            cursor = conn_check.cursor()
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
-            conn_check.commit() 
-            cursor.execute(f"USE {DB_NAME};") 
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS daily_visits (
-                    visit_date DATE PRIMARY KEY,
-                    visit_count INT DEFAULT 0
-                );
-            """)
-            conn_check.commit()
-            print(f"データベース '{DB_NAME}' とテーブル 'daily_visits' の準備ができました。")
-            cursor.close()
-        except Error as e:
-            print(f"データベース/テーブルの初期化中にエラーが発生しました: {e}")
-        finally:
-            if conn_check.is_connected():
-                conn_check.close()
-    else:
-        print("データベース接続がないため、データベース/テーブルの初期化をスキップします。")
 
     app.run(debug=True, port=5001)

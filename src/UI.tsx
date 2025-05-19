@@ -13,16 +13,20 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 
-import { Download, Image as ImageIcon, Loader2, Mail, X, Trash2, BookOpen, CheckCircle2, TrendingUp } from 'lucide-react';
-import './UI.css';
-import xIcon from './x_icon.png';
+// import { cn } from '@/lib/utils'; // 未使用
+import { Download, Image as ImageIcon, Loader2, Mail, X, Trash2, BookOpen, CheckCircle2 } from 'lucide-react'; // TrendingUpを削除
+import './UI.css'; // UI.cssファイルをインポート
+import xIcon from './x_icon.png'; // Xアイコン画像をインポート
 
+// アフィリエイト広告コンポーネント
 const AffiliateAdArea = ({ label, index }: { label: string; index: number }) => (
   <motion.div
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
     transition={{ duration: 0.5, delay: index * 0.2 }}
-    className="w-full h-48 text-gray-800 flex items-center justify-center rounded-lg shadow-lg mb-6 border border-yellow-300 bg-yellow-50 hover:shadow-xl transition-all duration-300 cursor-pointer"
+    className="w-full h-48 text-gray-800 flex items-center justify-center
+      rounded-lg shadow-lg mb-6 border border-yellow-300 bg-yellow-50
+      hover:shadow-xl transition-all duration-300 cursor-pointer"
   >
     <div className="text-center p-4">
       <div className="text-yellow-600 font-bold mb-2">{label}</div>
@@ -32,6 +36,7 @@ const AffiliateAdArea = ({ label, index }: { label: string; index: number }) => 
 
 const GoogleAdsenseAdArea = AffiliateAdArea;
 
+// フッターコンポーネント
 const Footer = () => (
   <motion.footer
     initial={{ opacity: 0, y: 20 }}
@@ -63,12 +68,6 @@ interface ImageDetail {
   compressedSize?: number;
 }
 
-// ★ 統計データ用のインターフェース
-interface DailyStat {
-  date: string; // バックエンドのレスポンスキー 'date' に合わせる
-  count: number; // バックエンドのレスポンスキー 'count' に合わせる
-}
-
 const ImageCompressorApp = () => {
   const [selectedImages, setSelectedImages] = useState<ImageDetail[]>([]);
   const [compressedZipBlob, setCompressedZipBlob] = useState<Blob | null>(null);
@@ -84,68 +83,8 @@ const ImageCompressorApp = () => {
   const [emailSentMessage, setEmailSentMessage] = useState<string | null>(null);
   const [isUsageDialogOpen, setIsUsageDialogOpen] = useState(false);
 
-  // ★ ページ読み込み時にアクセスを記録し、統計データを取得するuseEffect
   useEffect(() => {
-    // アクセス記録APIを呼び出し
-    const recordAccess = async () => {
-      try {
-        const response = await fetch('https://ic2-backend-44qq.onrender.com/record-access', { method: 'POST' });
-        if (!response.ok) {
-          console.error('Failed to record access:', response.statusText);
-        } else {
-          console.log('Access recorded successfully.');
-        }
-      } catch (error) {
-        console.error('Error recording access:', error);
-      }
-    };
-
-    // 日毎の統計データを取得
-    const fetchDailyStats = async () => {
-      console.log('[fetchDailyStats] Fetching daily stats...');
-      try {
-        const response = await fetch('https://ic2-backend-44qq.onrender.com/daily-stats');
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: "統計データの取得に失敗しました。" }));
-          console.error('[fetchDailyStats] Failed to fetch, status:', response.status, 'Error data:', errorData);
-          throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-        }
-        const data: DailyStat[] = await response.json();
-        console.log('[fetchDailyStats] Received data:', data);
-        // バックエンドから正しいキー名 (date, count) でデータが来ているか確認
-        if (data && data.length > 0 && 'date' in data[0] && 'count' in data[0]) {
-            setDailyStats(data);
-            setStatsError(null);
-        } else if (data && data.length > 0) {
-            // キー名が違う場合のフォールバックやログ
-            console.warn('[fetchDailyStats] Data received with unexpected keys. Expected "date" and "count". Received:', data[0]);
-            // もし visit_date, visit_count で来ていたら変換する (一時的な対応)
-            const mappedData = data.map((item: any) => ({
-                date: item.visit_date || item.date,
-                count: item.visit_count || item.count
-            })).filter(item => item.date && typeof item.count === 'number');
-            
-            if(mappedData.length > 0 && 'date' in mappedData[0] && 'count' in mappedData[0]) {
-                console.log('[fetchDailyStats] Mapped data to use:', mappedData);
-                setDailyStats(mappedData);
-                setStatsError(null);
-            } else {
-                setStatsError('統計データの形式が正しくありません。');
-                setDailyStats([]);
-            }
-        } else {
-            setDailyStats([]); // データがない場合は空配列
-            setStatsError(null); // エラーではない
-        }
-      } catch (error: any) {
-        console.error('[fetchDailyStats] Error fetching daily stats:', error);
-        setStatsError(error.message || '統計データの読み込み中にエラーが発生しました。');
-        setDailyStats([]); // エラー時はデータを空にする
-      }
-    };
-
-    recordAccess();
-    fetchDailyStats();
+    // ページ読み込み時の処理があればここに記述 (現在は空)
   }, []); // 空の依存配列で初回マウント時のみ実行
 
   const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -284,7 +223,8 @@ const ImageCompressorApp = () => {
 
       try {
         console.log(`[pollTaskStatus (${taskType}) attempt ${attempts}] Fetching status for task: ${taskId}`);
-        const response = await fetch(`http://localhost:5001/task-status/${taskId}`);
+        // バックエンドのURLをRender.comのものに変更
+        const response = await fetch(`https://ic2-backend-44qq.onrender.com/task-status/${taskId}`);
         
         if (response.status === 200) {
           const contentType = response.headers.get("content-type");
@@ -347,10 +287,10 @@ const ImageCompressorApp = () => {
               if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
             } else {
                 setStatusMessage("予期しないレスポンス形式です (JSON status unknown)。");
-              onError("予期しないレスポンス形式 (JSON status unknown)");
-              console.error(`[pollTaskStatus (${taskType})] Task ${taskId} unexpected JSON status:`, data);
-              clearPolling();
-              if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
+                onError("予期しないレスポンス形式 (JSON status unknown)");
+                console.error(`[pollTaskStatus (${taskType})] Task ${taskId} unexpected JSON status:`, data);
+                clearPolling();
+                if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
             }
           } else {
             setStatusMessage("サーバーから予期しない形式の応答がありました。");
@@ -359,7 +299,7 @@ const ImageCompressorApp = () => {
             clearPolling();
             if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
           }
-        } else {
+        } else { 
           const errorText = await response.text();
           setStatusMessage(`エラーが発生しました: ${response.status} ${errorText}`);
           onError(`サーバーエラー: ${response.status} ${errorText}`);
@@ -377,7 +317,7 @@ const ImageCompressorApp = () => {
     };
     console.log(`[pollTaskStatus (${taskType})] Starting polling for task: ${taskId}`);
     checkStatus();
-    return clearPolling;
+    return clearPolling; 
   }, [currentCompressionTaskId, currentEmailTaskId]);
 
   const handleCompress = useCallback(async () => {
@@ -392,11 +332,11 @@ const ImageCompressorApp = () => {
     setCompressionStatusMessage("圧縮処理の準備をしています...");
     setEmailSendStatusMessage(null);
     setEmailSentMessage(null);
-    setCompressedZipFilename('圧縮保存した写真フォルダ.zip');
-    setCurrentEmailTaskId(null);
+    setCompressedZipFilename('圧縮保存した写真フォルダ.zip'); 
+    setCurrentEmailTaskId(null); 
 
     const formData = new FormData();
-    selectedImages.forEach(imageDetail => {
+    selectedImages.forEach(imageDetail => { 
       formData.append('images', imageDetail.file, imageDetail.name);
     });
 
@@ -409,7 +349,7 @@ const ImageCompressorApp = () => {
 
     try {
       console.log("[handleCompress] Sending request to /compress-images");
-      const response = await fetch('https://ic2-backend-44qq.onrender.com/compress-images', {
+      const response = await fetch('http://localhost:5001/compress-images', {
         method: 'POST',
         body: formData,
       });
@@ -461,7 +401,8 @@ const ImageCompressorApp = () => {
 
     try {
       console.log("[handleSendEmail] Sending request to /send-zip-email");
-      const response = await fetch('http://localhost:5001/send-zip-email', {
+      // バックエンドのURLをRender.comのものに変更
+      const response = await fetch('https://ic2-backend-44qq.onrender.com/send-zip-email', {
         method: 'POST',
         body: formData,
       });
@@ -552,51 +493,6 @@ const ImageCompressorApp = () => {
       }
     };
   }, [currentEmailTaskId, isSendingEmail, pollTaskStatus]);
-
-  // ★ グラフデータとオプションの準備
-  const chartData = {
-    labels: dailyStats.map(stat => {
-      // 日付のフォーマットを MM/DD に変更 (例: "2023-05-17" -> "5/17")
-      const parts = stat.date.split('-');
-      // parts[1]は月(1-12)、parts[2]は日(1-31)と想定
-      return parts.length === 3 ? `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}` : stat.date;
-    }),
-    datasets: [
-      {
-        label: '日毎の利用者数',
-        data: dailyStats.map(stat => stat.count),
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-        barThickness: 30, // ★ 棒の太さを30pxに指定 (値を調整してください)
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false, // ★ コンテナに合わせてサイズ調整
-    plugins: {
-      legend: {
-        position: 'top' as const,
-      },
-      title: {
-        display: true,
-        text: '過去30日間の利用者数推移',
-        font: {
-          size: 16
-        }
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1, // 整数で目盛りを表示
-        }
-      },
-    },
-  };
 
 
   const formatFileSize = (bytes: number | undefined) => {
@@ -927,28 +823,6 @@ const ImageCompressorApp = () => {
             {/* <GoogleAdsenseAdArea label="GoogleAdSense 2" index={1} /> */}
           </div>
         </div>
-
-        {/* ★ 利用者数グラフのセクションを追加 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="w-full max-w-3xl bg-white rounded-xl shadow-xl p-6 mt-12" // 少し上にマージンを追加
-        >
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 flex items-center text-indigo-600">
-            <TrendingUp className="mr-2 h-6 w-6" />
-            利用者数の推移 (過去30日間)
-          </h3>
-          {statsError ? (
-            <div className="text-red-500 text-center py-4">{statsError}</div>
-          ) : dailyStats.length > 0 ? (
-            <div style={{ height: '300px', width: '100%' }}> {/* グラフのサイズを指定 */}
-              <Bar data={chartData} options={chartOptions} />
-            </div>
-          ) : (
-            <div className="text-gray-500 text-center py-4">統計データがありません。</div>
-          )}
-        </motion.div>
       </main>
 
       <Footer />

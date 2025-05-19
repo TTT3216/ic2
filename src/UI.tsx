@@ -114,9 +114,9 @@ const ImageCompressorApp = () => {
   // ★ ページ読み込み時にアクセスを記録し、統計データを取得するuseEffect
   useEffect(() => {
     // アクセス記録APIを呼び出し
+    /*
     const recordAccess = async () => {
       try {
-        // バックエンドのURLをRender.comのものに変更
         const response = await fetch('https://ic2-backend-44qq.onrender.com/record-access', { method: 'POST' });
         if (!response.ok) {
           console.error('Failed to record access:', response.statusText);
@@ -127,12 +127,13 @@ const ImageCompressorApp = () => {
         console.error('Error recording access:', error);
       }
     };
+    */
 
     // 日毎の統計データを取得
+    /*
     const fetchDailyStats = async () => {
       console.log('[fetchDailyStats] Fetching daily stats...');
       try {
-        // バックエンドのURLをRender.comのものに変更
         const response = await fetch('https://ic2-backend-44qq.onrender.com/daily-stats');
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: "統計データの取得に失敗しました。" }));
@@ -172,9 +173,10 @@ const ImageCompressorApp = () => {
         setDailyStats([]); // エラー時はデータを空にする
       }
     };
+    */
 
-    recordAccess();
-    fetchDailyStats();
+    // recordAccess(); // 削除またはコメントアウト
+    // fetchDailyStats(); // 削除またはコメントアウト
   }, []); // 空の依存配列で初回マウント時のみ実行
 
   const handleImageChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,8 +315,7 @@ const ImageCompressorApp = () => {
 
       try {
         console.log(`[pollTaskStatus (${taskType}) attempt ${attempts}] Fetching status for task: ${taskId}`);
-        // バックエンドのURLをRender.comのものに変更
-        const response = await fetch(`https://ic2-backend-44qq.onrender.com/task-status/${taskId}`);
+        const response = await fetch(`http://localhost:5001/task-status/${taskId}`);
         
         if (response.status === 200) {
           const contentType = response.headers.get("content-type");
@@ -439,8 +440,7 @@ const ImageCompressorApp = () => {
 
     try {
       console.log("[handleCompress] Sending request to /compress-images");
-      // バックエンドのURLをRender.comのものに変更
-      const response = await fetch('https://ic2-backend-44qq.onrender.com/compress-images', {
+      const response = await fetch('http://localhost:5001/compress-images', {
         method: 'POST',
         body: formData,
       });
@@ -492,8 +492,7 @@ const ImageCompressorApp = () => {
 
     try {
       console.log("[handleSendEmail] Sending request to /send-zip-email");
-      // バックエンドのURLをRender.comのものに変更
-      const response = await fetch('https://ic2-backend-44qq.onrender.com/send-zip-email', {
+      const response = await fetch('http://localhost:5001/send-zip-email', {
         method: 'POST',
         body: formData,
       });

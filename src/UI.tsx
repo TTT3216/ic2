@@ -53,7 +53,7 @@ const Footer = () => (
       <div className="w-6 h-6 rounded-full flex items-center justify-center overflow-hidden">
         <img src={xIcon} alt="X icon" className="w-full h-full object-contain" />
       </div>
-      <span className="text-blue-600 hover:underline font-medium">エラーや相談などで御用の方は、@TENM3169(Xアカウント)のDMまでご連絡ください(この文章を押してください。)</span>
+      <span className="text-blue-600 hover:underline font-medium">エラーや相談などで御用の方は、@TENM3169(Xアカウント)のDMまでご連絡ください(この文章を押してください)。</span>
     </a>
   </motion.footer>
 );
@@ -99,7 +99,7 @@ const ImageCompressorApp = () => {
               id: `${file.name}-${Date.now()}-${index}`,
               name: file.name,
               originalSrc: event.target?.result as string,
-              file: file, 
+              file: file,
               compressedSrc: null,
               originalSize: file.size,
               compressedSize: undefined,
@@ -119,7 +119,7 @@ const ImageCompressorApp = () => {
           setEmailSendStatusMessage(null);
           setEmailSentMessage(null);
           setCurrentCompressionTaskId(null);
-          setCompressedZipFilename('圧縮保存した写真フォルダ.zip'); 
+          setCompressedZipFilename('圧縮保存した写真フォルダ.zip');
           setCurrentEmailTaskId(null);
         })
         .catch(error => {
@@ -144,14 +144,14 @@ const ImageCompressorApp = () => {
     setEmailSentMessage(null);
     setCurrentCompressionTaskId(null);
     setCurrentEmailTaskId(null);
-    setCompressedZipFilename('圧縮保存した写真フォルダ.zip'); 
-    setIsCompressing(false); 
-    setIsSendingEmail(false); 
+    setCompressedZipFilename('圧縮保存した写真フォルダ.zip');
+    setIsCompressing(false);
+    setIsSendingEmail(false);
     if (inputRef.current) {
       inputRef.current.value = '';
     }
   }, []);
-  
+
   const downloadCompressedZip = useCallback(() => {
     console.log("downloadCompressedZip function CALLED!");
     if (!compressedZipBlob) {
@@ -165,7 +165,7 @@ const ImageCompressorApp = () => {
     const url = window.URL.createObjectURL(compressedZipBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = compressedZipFilename; 
+    a.download = compressedZipFilename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -175,7 +175,7 @@ const ImageCompressorApp = () => {
 
   const pollTaskStatus = useCallback((
     taskId: string,
-    onComplete: (data: any, filename?: string) => void, 
+    onComplete: (data: any, filename?: string) => void,
     onError: (errorMsg: string) => void,
     setStatusMessage: (msg: string | null) => void,
     isCompressionTask: boolean = false
@@ -226,15 +226,15 @@ const ImageCompressorApp = () => {
         console.log(`[pollTaskStatus (${taskType}) attempt ${attempts}] Fetching status for task: ${taskId}`);
         // APIの呼び出し先をRender.comのURLに変更
         const response = await fetch(`https://ic2-backend-44qq.onrender.com/task-status/${taskId}`);
-        
+
         if (response.status === 200) {
           const contentType = response.headers.get("content-type");
           console.log(`[pollTaskStatus (${taskType})] Task ${taskId} - Response Content-Type:`, contentType);
-          if (contentType?.includes("application/zip")) { 
+          if (contentType?.includes("application/zip")) {
             setStatusMessage(null);
             console.log(`[pollTaskStatus (${taskType})] Task ${taskId} - Preparing to call onComplete with blob.`);
             const blob = await response.blob();
-            let filenameFromServer = '圧縮保存した写真フォルダ.zip'; 
+            let filenameFromServer = '圧縮保存した写真フォルダ.zip';
             const disposition = response.headers.get('content-disposition');
             console.log(`[pollTaskStatus (${taskType})] Raw Content-Disposition header for task ${taskId}:`, disposition);
 
@@ -248,14 +248,14 @@ const ImageCompressorApp = () => {
                   console.warn(`[pollTaskStatus (${taskType})] decodeURIComponent failed for filename* '${filenameStarMatch[1]}' for task ${taskId}:`, e);
                   const filenameMatch = disposition.match(/filename="([^"]+)"/i) || disposition.match(/filename=([^;]+)/i);
                   if (filenameMatch && filenameMatch[1]) {
-                    filenameFromServer = filenameMatch[1].replace(/^"|"$/g, ''); 
+                    filenameFromServer = filenameMatch[1].replace(/^"|"$/g, '');
                     console.log(`[pollTaskStatus (${taskType})] Extracted filename from plain filename (fallback after filename* error) for task ${taskId}:`, filenameFromServer);
                   }
                 }
               } else {
                 const filenameMatch = disposition.match(/filename="([^"]+)"/i) || disposition.match(/filename=([^;]+)/i);
                 if (filenameMatch && filenameMatch[1]) {
-                  filenameFromServer = filenameMatch[1].replace(/^"|"$/g, ''); 
+                  filenameFromServer = filenameMatch[1].replace(/^"|"$/g, '');
                   console.log(`[pollTaskStatus (${taskType})] Extracted filename from plain filename for task ${taskId}:`, filenameFromServer);
                 }
               }
@@ -264,7 +264,7 @@ const ImageCompressorApp = () => {
             }
 
             console.log(`[pollTaskStatus (${taskType})] Final filename to be passed to onComplete for task ${taskId}: ${filenameFromServer}`);
-            onComplete(blob, filenameFromServer); 
+            onComplete(blob, filenameFromServer);
             console.log(`[pollTaskStatus (${taskType})] Task ${taskId} completed (ZIP received).`);
             clearPolling();
             if (isCompressionTask) setIsCompressing(false);
@@ -276,7 +276,7 @@ const ImageCompressorApp = () => {
               currentTimeoutId = setTimeout(checkStatus, interval);
             } else if (data.status === "completed") {
               setStatusMessage(null);
-              onComplete(data.result || data); 
+              onComplete(data.result || data);
               console.log(`[pollTaskStatus (${taskType})] Task ${taskId} completed (JSON result). Result:`, data.result || data);
               clearPolling();
               if (!isCompressionTask) setIsSendingEmail(false);
@@ -300,7 +300,7 @@ const ImageCompressorApp = () => {
             clearPolling();
             if (isCompressionTask) setIsCompressing(false); else setIsSendingEmail(false);
           }
-        } else { 
+        } else {
           const errorText = await response.text();
           setStatusMessage(`エラーが発生しました: ${response.status} ${errorText}`);
           onError(`サーバーエラー: ${response.status} ${errorText}`);
@@ -318,7 +318,7 @@ const ImageCompressorApp = () => {
     };
     console.log(`[pollTaskStatus (${taskType})] Starting polling for task: ${taskId}`);
     checkStatus();
-    return clearPolling; 
+    return clearPolling;
   }, [currentCompressionTaskId, currentEmailTaskId]);
 
   const handleCompress = useCallback(async () => {
@@ -333,11 +333,11 @@ const ImageCompressorApp = () => {
     setCompressionStatusMessage("圧縮処理の準備をしています...");
     setEmailSendStatusMessage(null);
     setEmailSentMessage(null);
-    setCompressedZipFilename('圧縮保存した写真フォルダ.zip'); 
-    setCurrentEmailTaskId(null); 
+    setCompressedZipFilename('圧縮保存した写真フォルダ.zip');
+    setCurrentEmailTaskId(null);
 
     const formData = new FormData();
-    selectedImages.forEach(imageDetail => { 
+    selectedImages.forEach(imageDetail => {
       formData.append('images', imageDetail.file, imageDetail.name);
     });
 
@@ -360,21 +360,21 @@ const ImageCompressorApp = () => {
         const data = await response.json();
         console.log("[handleCompress] Received task_id:", data.task_id);
         setCompressionStatusMessage("圧縮処理を受け付けました。完了までお待ちください...");
-        setCurrentCompressionTaskId(data.task_id); 
+        setCurrentCompressionTaskId(data.task_id);
       } else {
         const errorData = await response.json().catch(() => ({ error: "サーバーからのエラー詳細取得に失敗しました。" }));
         console.error("[handleCompress] Image compression error:", response.status, errorData);
         alert(`画像圧縮エラー: ${errorData.error || response.statusText}`);
         setIsCompressing(false);
         setCompressionStatusMessage(null);
-        setCurrentCompressionTaskId(null); 
+        setCurrentCompressionTaskId(null);
       }
     } catch (error) {
       console.error("[handleCompress] Unexpected error during image compression:", error);
       alert(`画像圧縮中に予期せぬエラーが発生しました。`);
       setIsCompressing(false);
       setCompressionStatusMessage(null);
-      setCurrentCompressionTaskId(null); 
+      setCurrentCompressionTaskId(null);
     }
   }, [selectedImages, isCompressing]); // pollTaskStatus を依存配列から削除 (直接呼び出していないため)
 
@@ -395,10 +395,10 @@ const ImageCompressorApp = () => {
     setEmailSentMessage(null);
     setEmailSendStatusMessage("メール送信処理の準備をしています...");
     setIsSendingEmail(true);
-    setCurrentCompressionTaskId(null); 
+    setCurrentCompressionTaskId(null);
 
     const formData = new FormData();
-    formData.append('zip_file', compressedZipBlob, compressedZipFilename); 
+    formData.append('zip_file', compressedZipBlob, compressedZipFilename);
     formData.append('email_address', email);
 
     try {
@@ -413,21 +413,21 @@ const ImageCompressorApp = () => {
         const data = await response.json();
         console.log("[handleSendEmail] Received task_id:", data.task_id);
         setEmailSendStatusMessage("メール送信処理を受け付けました。完了までお待ちください...");
-        setCurrentEmailTaskId(data.task_id); 
+        setCurrentEmailTaskId(data.task_id);
       } else {
         const errorData = await response.json().catch(() => ({ error: "サーバーからのエラー詳細取得に失敗しました。" }));
         console.error("[handleSendEmail] Email sending error:", response.status, errorData);
         alert(`メール送信エラー: ${errorData.error || response.statusText}`);
         setIsSendingEmail(false);
         setEmailSendStatusMessage(null);
-        setCurrentEmailTaskId(null); 
+        setCurrentEmailTaskId(null);
       }
     } catch (error) {
       console.error("[handleSendEmail] Unexpected error during email sending:", error);
       alert(`メール送信中に予期せぬエラーが発生しました。`);
       setIsSendingEmail(false);
       setEmailSendStatusMessage(null);
-      setCurrentEmailTaskId(null); 
+      setCurrentEmailTaskId(null);
     }
   }, [compressedZipBlob, email, compressedZipFilename]); // pollTaskStatus を依存配列から削除
 
@@ -438,13 +438,13 @@ const ImageCompressorApp = () => {
       console.log(`[useEffect Compress] Detected currentCompressionTaskId: ${currentCompressionTaskId}, starting poll.`);
       clearPollingFunction = pollTaskStatus(
         currentCompressionTaskId,
-        (blobResult: any, filename?: string) => { 
-          console.log("[useEffect Compress onComplete] Received blobResult:", blobResult, "Filename from onComplete callback:", filename); 
+        (blobResult: any, filename?: string) => {
+          console.log("[useEffect Compress onComplete] Received blobResult:", blobResult, "Filename from onComplete callback:", filename);
           if (blobResult instanceof Blob) {
             setCompressedZipBlob(blobResult);
             const finalFilenameToSet = filename || '圧縮保存した写真フォルダ.zip';
-            setCompressedZipFilename(finalFilenameToSet); 
-            console.log("[useEffect Compress onComplete] Called setCompressedZipFilename with:", finalFilenameToSet); 
+            setCompressedZipFilename(finalFilenameToSet);
+            console.log("[useEffect Compress onComplete] Called setCompressedZipFilename with:", finalFilenameToSet);
           } else {
             console.error("[useEffect Compress onComplete] Expected Blob, got:", typeof blobResult);
           }
@@ -455,7 +455,7 @@ const ImageCompressorApp = () => {
           setCompressionStatusMessage(`圧縮エラー: ${errorMsg}`);
         },
         setCompressionStatusMessage,
-        true 
+        true
       );
     }
 
@@ -476,7 +476,9 @@ const ImageCompressorApp = () => {
         currentEmailTaskId,
         (result: { message: string }) => {
           console.log("[useEffect Email onComplete] Received result:", result);
-          setEmailSentMessage(result.message || "メール送信が完了しました。");
+          const originalMessage = result.message || "メール送信が完了しました。";
+          const additionalNote = '（※メールが見当たらなければ、迷惑メールも確認してください）';
+          setEmailSentMessage(`${originalMessage}${additionalNote}`);
           setEmailSendStatusMessage(null);
         },
         (errorMsg: string) => {
@@ -484,7 +486,7 @@ const ImageCompressorApp = () => {
           setEmailSendStatusMessage(`メール送信エラー: ${errorMsg}`);
         },
         setEmailSendStatusMessage,
-        false 
+        false
       );
     }
 
@@ -564,10 +566,10 @@ const ImageCompressorApp = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 px-6 shadow-lg sticky top-0 z-50" 
+        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 px-6 shadow-lg sticky top-0 z-50"
       >
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-wide flex items-center"> 
+          <h1 className="text-2xl md:text-3xl font-bold tracking-wide flex items-center">
             <ImageIcon className="mr-2" />
             Image Compression Machine
           </h1>
@@ -589,7 +591,7 @@ const ImageCompressorApp = () => {
 
                 <h3 className="text-md font-semibold text-indigo-600 mt-3">1. 画像を選択</h3>
                 <p>「1.画像を選択してください」エリアにあるファイル選択ボタン（点線の枠内）をクリックするか、画像をドラッグ＆ドロップ（対応ブラウザのみ）して、圧縮したい画像を選びます。<br />JPEG, PNG, GIF, WEBP 形式の画像に対応しており、複数選択も可能です。<br />選択した画像は「2.入力画像一覧」にプレビューとして表示されます。</p>
-                
+
                 <h3 className="text-md font-semibold text-indigo-600 mt-3">2. 選択画像の確認と個別キャンセル (任意)</h3>
                 <p>「2.入力画像一覧」で、選択した画像を確認できます。<br />もし間違えて画像を選択してしまった場合は、各画像プレビューの右上に表示される「✖」ボタンをクリックすると、その画像をリストから削除できます。</p>
 
